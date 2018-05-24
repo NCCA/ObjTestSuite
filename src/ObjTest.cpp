@@ -11,18 +11,18 @@ int main(int argc, char **argv)
   return RUN_ALL_TESTS();
 }
 
-std::array<const char *,5> validfiles={
+const std::array<const char *,6> validfiles={
   {
    "files/Triangle1.obj",
    "files/TriangleNoNormal.obj",
    "files/TriangleVertsOnly.obj",
    "files/TriangleVertsUV.obj",
-   "files/Triangle3UV.obj"
+   "files/Triangle3UV.obj",
+    "files/TriMessedFormat.obj"
   }
 };
 
-
-std::array<const char *,1> invalidfiles={
+const std::array<const char *,1> invalidfiles={
   {
     "files/BrokenFloats.obj"
   }
@@ -57,6 +57,7 @@ TEST(Obj,loadvalid)
   Obj a;
   for(auto f : validfiles)
   {
+    std::cout<<f<<'\n';
     EXPECT_TRUE(a.load(f));
     EXPECT_TRUE(a.isLoaded());
   }
@@ -106,5 +107,36 @@ TEST(ObjInternal,parseUV3)
   EXPECT_TRUE(a.load("files/Triangle3UV.obj"));
   EXPECT_EQ(a.getNumTexCords(),3);
 }
+
+TEST(Obj,checkVerts)
+{
+  Obj a("files/Triangle1.obj");
+  std::vector<ngl::Vec3> verts=a.getVertexList();
+  ASSERT_TRUE(verts[0]==ngl::Vec3(2.00000f, 0.00000f, 0.000000f));
+  ASSERT_TRUE(verts[1]==ngl::Vec3(0.0000f, 4.0000f, 0.000000f));
+  ASSERT_TRUE(verts[2]==ngl::Vec3(-2.00000f, 0.000000f, 0.000000f));
+
+}
+
+TEST(Obj,checkNorm)
+{
+  Obj a("files/Triangle1.obj");
+  std::vector<ngl::Vec3> norm=a.getNormalList();
+  ASSERT_TRUE(norm[0]==ngl::Vec3(0.000000f, 0.000000f, 1.000000f));
+  ASSERT_TRUE(norm[1]==ngl::Vec3(0.000000f, 0.000000f, 1.000000f));
+  ASSERT_TRUE(norm[2]==ngl::Vec3(0.000000f, 0.000000f, 1.000000f));
+
+}
+
+TEST(Obj,checkUV)
+{
+  Obj a("files/Triangle1.obj");
+  std::vector<ngl::Vec3> uv=a.getTextureCordList();
+  ASSERT_TRUE(uv[0]==ngl::Vec3(1.000000f, 0.000000f, 0.000000f));
+  ASSERT_TRUE(uv[1]==ngl::Vec3(0.500000f, 1.000000f, 0.000000f));
+  ASSERT_TRUE(uv[2]==ngl::Vec3(0.004399f, 0.008916f, 0.000000f));
+}
+
+
 
 

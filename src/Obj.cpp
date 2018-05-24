@@ -1,7 +1,13 @@
 #include "Obj.h"
 #include "pystring.h"
-
+#include <string>
 namespace ps=pystring;
+
+Obj::Obj(const std::string& _fname  , CalcBB _calcBB)  noexcept :AbstractMesh()
+{
+  load(_fname,_calcBB);
+}
+
 
 bool Obj::load(const std::string_view & _fname, CalcBB _calcBB ) noexcept
 {
@@ -48,9 +54,8 @@ bool Obj::parseVertex()
   bool parsedOK=true;
   for(auto line : m_fileContents)
   {
-    line=ps::lstrip(line);
     std::vector<std::string> tokens;
-    ps::split(line,tokens," ");
+    ps::split(line,tokens);
     if(tokens.size() !=0)
     {
       if( tokens[0] == "v" )
@@ -73,7 +78,6 @@ bool Obj::parseVertex()
     }
 
   }
-  m_nVerts=m_verts.size();
 
   return parsedOK;
 }
@@ -83,9 +87,8 @@ bool Obj::parseNormal()
   bool parsedOK=true;
   for(auto line : m_fileContents)
   {
-    line=ps::lstrip(line);
     std::vector<std::string> tokens;
-    ps::split(line,tokens," ");
+    ps::split(line,tokens);
     if(tokens.size() !=0)
     {
       if( tokens[0] == "vn" )
@@ -108,7 +111,6 @@ bool Obj::parseNormal()
     }
 
   }
-  m_nNorm=m_norm.size();
 
   return parsedOK;
 
@@ -119,9 +121,8 @@ bool Obj::parseUV()
   bool parsedOK=true;
   for(auto line : m_fileContents)
   {
-    line=ps::lstrip(line);
     std::vector<std::string> tokens;
-    ps::split(line,tokens," ");
+    ps::split(line,tokens);
     if(tokens.size() !=0)
     {
       if( tokens[0] == "vt" )
@@ -134,7 +135,7 @@ bool Obj::parseUV()
           if(tokens.size()==4)
             z=std::stof(tokens[3]);
 
-          m_tex.push_back({x,y,z});
+          m_uv.push_back({x,y,z});
           ++m_currentUVOffset;
 
         } catch (std::invalid_argument)
@@ -147,7 +148,6 @@ bool Obj::parseUV()
     }
 
   }
-  m_nTex=m_tex.size();
 
   return parsedOK;
 

@@ -9,6 +9,8 @@ class Obj : public ngl::AbstractMesh
 {
   public :
     Obj()  noexcept: ngl::AbstractMesh(){}
+    Obj(const std::string& _fname  , CalcBB _clacBB=CalcBB::True)  noexcept ;
+
     virtual bool load(const std::string_view &_fname, CalcBB _calcBB=CalcBB::True ) noexcept;
     bool isLoaded() const {return m_isLoaded;}
   private :
