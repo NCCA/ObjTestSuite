@@ -14,9 +14,21 @@ class Obj : public ngl::AbstractMesh
     virtual bool load(const std::string_view &_fname, CalcBB _calcBB=CalcBB::True ) noexcept;
     bool isLoaded() const {return m_isLoaded;}
   private :
-    bool parseVertex();
-    bool parseNormal();
-    bool parseUV();
+    bool parseVertex(std::vector<std::string> &_tokens);
+    bool parseNormal(std::vector<std::string> &_tokens);
+    bool parseUV(std::vector<std::string> &_tokens);
+    // face parsing is complex we have different layouts.
+    // don't forget we can also have negative indices
+    bool parseFace(std::vector<std::string> &_tokens);
+    // f v v v v
+    bool parseFaceVertex(std::vector<std::string> &_tokens);
+    // f v//vn v//vn v//vn v//vn
+    bool parseFaceVertexNormal(std::vector<std::string> &_tokens);
+    // f v/vt v/vt v/vt v/vt
+    bool parseFaceVertexUV(std::vector<std::string> &_tokens);
+    // f v/vt/vn v/vt/vn v/vt/vn v/vt/vn
+    bool parseFaceVertexNormalUV(std::vector<std::string> &_tokens);
+
     std::vector<std::string> m_fileContents;
     bool m_isLoaded=false;
     // as faces can use negative index values keep track of index

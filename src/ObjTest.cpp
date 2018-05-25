@@ -11,14 +11,16 @@ int main(int argc, char **argv)
   return RUN_ALL_TESTS();
 }
 
-const std::array<const char *,6> validfiles={
+const std::array<const char *,7> validfiles={
   {
    "files/Triangle1.obj",
-   "files/TriangleNoNormal.obj",
+   "files/TriangleVertNormal.obj",
    "files/TriangleVertsOnly.obj",
    "files/TriangleVertsUV.obj",
    "files/Triangle3UV.obj",
-    "files/TriMessedFormat.obj"
+   "files/TriMessedFormat.obj",
+   "files/CubeNegativeIndex.obj"
+
   }
 };
 
@@ -57,7 +59,7 @@ TEST(Obj,loadvalid)
   Obj a;
   for(auto f : validfiles)
   {
-    std::cout<<f<<'\n';
+//    std::cout<<f<<'\n';
     EXPECT_TRUE(a.load(f));
     EXPECT_TRUE(a.isLoaded());
   }
@@ -76,7 +78,7 @@ TEST(Obj,loadinvalid)
 TEST(Obj,loadFail)
 {
   Obj a;
-  EXPECT_FALSE(a.load("nothing"));
+  EXPECT_FALSE(a.load("nothere.obj"));
   EXPECT_FALSE(a.isLoaded());
 }
 
@@ -139,4 +141,83 @@ TEST(Obj,checkUV)
 
 
 
+
+TEST(Obj,checkFaceVertOnly)
+{
+  Obj a("files/TriangleVertsOnly.obj");
+  std::vector<ngl::Face> face=a.getFaceList();
+  // face is f 1/1/1 2/2/2 3/3/3 but we index from 0
+  ASSERT_EQ(face[0].m_vert[0],0);
+  ASSERT_EQ(face[0].m_vert[1],1);
+  ASSERT_EQ(face[0].m_vert[2],2);
+}
+
+TEST(Obj,checkFaceVertNormal)
+{
+  Obj a("files/TriangleVertNormal.obj");
+  std::vector<ngl::Face> face=a.getFaceList();
+  // face is f 1//1 2//2 3//3  but we index from 0
+  ASSERT_EQ(face[0].m_vert[0],0);
+  ASSERT_EQ(face[0].m_vert[1],1);
+  ASSERT_EQ(face[0].m_vert[2],2);
+  ASSERT_EQ(face[0].m_norm[0],0);
+  ASSERT_EQ(face[0].m_norm[1],1);
+  ASSERT_EQ(face[0].m_norm[2],2);
+
+}
+
+
+TEST(Obj,checkFaceVertUV)
+{
+  Obj a("files/TriangleVertsUV.obj");
+  std::vector<ngl::Face> face=a.getFaceList();
+  // face is f 1/1 2/2 3/3  but we index from 0
+  ASSERT_EQ(face[0].m_vert[0],0);
+  ASSERT_EQ(face[0].m_vert[1],1);
+  ASSERT_EQ(face[0].m_vert[2],2);
+  ASSERT_EQ(face[0].m_uv[0],0);
+  ASSERT_EQ(face[0].m_uv[1],1);
+  ASSERT_EQ(face[0].m_uv[2],2);
+
+}
+
+TEST(Obj,checkFaceVertOnlyNegativeIndex)
+{
+  Obj a("files/CubeNegativeIndex.obj");
+  std::vector<ngl::Face> face=a.getFaceList();
+  // face is f -4 -3 -2 -1
+  int idx=0;
+  for(size_t i=0; i<face.size(); ++i)
+  {
+    ASSERT_EQ(face[i].m_vert[0],idx);
+    ASSERT_EQ(face[i].m_vert[1],idx+1);
+    ASSERT_EQ(face[i].m_vert[2],idx+2);
+    ASSERT_EQ(face[i].m_vert[3],idx+3);
+    idx+=4;
+  }
+}
+
+
+
+
+
+TEST(Obj,checkFace)
+{
+  Obj a("files/Triangle1.obj");
+  std::vector<ngl::Face> face=a.getFaceList();
+  // face is f 1/1/1 2/2/2 3/3/3 but we index from 0
+  ASSERT_EQ(face[0].m_vert[0],0);
+  ASSERT_EQ(face[0].m_vert[1],1);
+  ASSERT_EQ(face[0].m_vert[2],2);
+
+  ASSERT_EQ(face[0].m_norm[0],0);
+  ASSERT_EQ(face[0].m_norm[1],1);
+  ASSERT_EQ(face[0].m_norm[2],2);
+
+  ASSERT_EQ(face[0].m_uv[0],0);
+  ASSERT_EQ(face[0].m_uv[1],1);
+  ASSERT_EQ(face[0].m_uv[2],2);
+
+
+}
 

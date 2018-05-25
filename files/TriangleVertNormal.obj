@@ -11,4 +11,4 @@ vt 0.004399 0.008916
 s off
 g polySurface1
 usemtl initialShadingGroup
-f 1///1 2//2 3//3
+f 1//1 2//2 3//3
