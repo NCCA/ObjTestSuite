@@ -9,6 +9,17 @@ Obj::Obj(const std::string& _fname  , CalcBB _calcBB)  noexcept :AbstractMesh()
   load(_fname,_calcBB);
 }
 
+Obj::Obj(const Obj &_c)
+{
+
+}
+
+Obj::Obj(Obj &&_c)
+{
+
+}
+
+
 void Obj::addVertex(const ngl::Vec3 &_v)
 {
   m_verts.push_back(_v);
@@ -41,10 +52,8 @@ bool Obj::save(const std::string_view &_fname)
     std::cout<<"ERROR could not open file for writing "<<_fname.data()<<"\n";
     return false;
   }
-
   // write out some comments
   out<<"# This file was created by ngl Obj exporter "<<_fname.data()<<'\n';
-  // was c++ 11  for(Vec3 v : m_norm) for all of these
   // write out the verts
   for(auto v : m_verts)
   {
@@ -80,8 +89,11 @@ bool Obj::save(const std::string_view &_fname)
     if(m_norm.size() !=0)
     {
     out<<'/';
+      // weird case where we need to do f 1//1
       if(m_uv.size()==0)
+      {
         out<<'/';
+      }
     out<<f.m_norm[i]+1;
     out<<" ";
     }
@@ -91,7 +103,6 @@ bool Obj::save(const std::string_view &_fname)
   }
   return true;
 }
-
 
 
 

@@ -10,6 +10,8 @@ class Obj : public ngl::AbstractMesh
   public :
     Obj()  noexcept: ngl::AbstractMesh(){}
     Obj(const std::string& _fname  , CalcBB _clacBB=CalcBB::True)  noexcept ;
+    Obj(const Obj &_c);
+    Obj(Obj &&_c);
     void addVertex(const ngl::Vec3 &_v);
     void addNormal(const ngl::Vec3 &_v);
     void addUV(const ngl::Vec2 &_v);

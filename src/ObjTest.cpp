@@ -503,8 +503,42 @@ TEST(Obj,saveObj)
   ASSERT_TRUE(uv[0]==ngl::Vec3(1.000000f,0.000000f,0.000000f));
   ASSERT_TRUE(uv[1]==ngl::Vec3(0.500000f,1.000000f,0.000000f));
   ASSERT_TRUE(uv[2]==ngl::Vec3(0.004399f,0.008916f,0.000000f));
-
-
 }
 
 
+TEST(Obj,copyctor)
+{
+  Obj a;
+
+  a.addVertex({2.00000f,0.00000f,0.000000f});
+  a.addVertex({0.0000f,4.0000f,0.000000});
+  a.addVertex({-2.00000f,0.000000f,0.000000});
+  a.addUV(ngl::Vec2(1.000000f,0.000000f));
+  a.addUV(ngl::Vec2(0.500000f,1.000000f));
+  a.addUV(ngl::Vec2(0.004399f,0.008916f));
+
+  ngl::Face f;
+  f.m_vert.push_back(0);
+  f.m_vert.push_back(1);
+  f.m_vert.push_back(2);
+  f.m_uv.push_back(0);
+  f.m_uv.push_back(1);
+  f.m_uv.push_back(2);
+
+  Obj b(a);
+  std::vector<ngl::Face> face=b.getFaceList();
+  // face is f 1/1/1 2/2/2 3/3/3 but we index from 0
+  ASSERT_EQ(face[0].m_vert[0],0);
+  ASSERT_EQ(face[0].m_vert[1],1);
+  auto verts=b.getVertexList();
+  ASSERT_TRUE(verts[0]==ngl::Vec3(2.00000f,0.00000f,0.000000f));
+  ASSERT_TRUE(verts[1]==ngl::Vec3(0.0000f,4.0000f,0.000000));
+  ASSERT_TRUE(verts[2]==ngl::Vec3(-2.00000f,0.000000f,0.000000));
+  ASSERT_EQ(face[0].m_vert[2],2);
+  auto uv=b.getUVList();
+  ASSERT_TRUE(uv[0]==ngl::Vec3(1.000000f,0.000000f,0.000000f));
+  ASSERT_TRUE(uv[1]==ngl::Vec3(0.500000f,1.000000f,0.000000f));
+  ASSERT_TRUE(uv[2]==ngl::Vec3(0.004399f,0.008916f,0.000000f));
+
+
+}
