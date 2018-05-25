@@ -72,12 +72,20 @@ bool Obj::save(const std::string_view &_fname)
   {
     // don't forget that obj indices start from 1 not 0 (i did originally !)
     out<<f.m_vert[i]+1;
-    out<<"/";
+    if(m_uv.size() !=0)
+    {
+    out<<'/';
     out<<f.m_uv[i]+1;
-    out<<"/";
-
+    }
+    if(m_norm.size() !=0)
+    {
+    out<<'/';
+      if(m_uv.size()==0)
+        out<<'/';
     out<<f.m_norm[i]+1;
     out<<" ";
+    }
+    out<<' ';
   }
   out<<'\n';
   }
