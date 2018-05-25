@@ -9,6 +9,83 @@ Obj::Obj(const std::string& _fname  , CalcBB _calcBB)  noexcept :AbstractMesh()
   load(_fname,_calcBB);
 }
 
+void Obj::addVertex(const ngl::Vec3 &_v)
+{
+  m_verts.push_back(_v);
+}
+void Obj::addNormal(const ngl::Vec3 &_v)
+{
+  m_norm.push_back(_v);
+}
+void Obj::addUV(const ngl::Vec2 &_v)
+{
+  ngl::Vec3 v(_v.m_x,_v.m_y,0.0f);
+  m_uv.push_back(v);
+}
+void Obj::addUV(const ngl::Vec3 &_v)
+{
+  m_uv.push_back(_v);
+}
+
+void Obj::addFace(const ngl::Face &_f)
+{
+  m_face.push_back(_f);
+}
+
+
+bool Obj::save(const std::string_view &_fname)
+{
+  std::ofstream out(_fname.data());
+  if (out.is_open() != true)
+  {
+    std::cout<<"ERROR could not open file for writing "<<_fname.data()<<"\n";
+    return false;
+  }
+
+  // write out some comments
+  out<<"# This file was created by ngl Obj exporter "<<_fname.data()<<'\n';
+  // was c++ 11  for(Vec3 v : m_norm) for all of these
+  // write out the verts
+  for(auto v : m_verts)
+  {
+    out<<"v "<<v.m_x<<" "<<v.m_y<<" "<<v.m_z<<'\n';
+  }
+
+  // write out the tex cords
+  for(auto v : m_uv)
+  {
+    out<<"vt "<<v.m_x<<" "<<v.m_y<<'\n';
+  }
+  // write out the normals
+
+  for(auto v : m_norm)
+  {
+    out<<"vn "<<v.m_x<<" "<<v.m_y<<" "<<v.m_z<<'\n';
+  }
+
+  // finally the faces
+  for(auto f : m_face)
+  {
+  out<<"f ";
+  // we now have V/T/N for each to write out
+  for(unsigned int i=0; i<f.m_vert.size(); ++i)
+  {
+    // don't forget that obj indices start from 1 not 0 (i did originally !)
+    out<<f.m_vert[i]+1;
+    out<<"/";
+    out<<f.m_uv[i]+1;
+    out<<"/";
+
+    out<<f.m_norm[i]+1;
+    out<<" ";
+  }
+  out<<'\n';
+  }
+  return true;
+}
+
+
+
 
 bool Obj::load(const std::string_view & _fname, CalcBB _calcBB ) noexcept
 {
@@ -53,6 +130,11 @@ bool Obj::load(const std::string_view & _fname, CalcBB _calcBB ) noexcept
   } // while
 
   in.close();
+  // Calculate the center of the object.
+  if(_calcBB == CalcBB::True)
+  {
+    this->calcDimensions();
+  }
   m_isLoaded=true;
   return true;
 }
@@ -305,6 +387,5 @@ bool Obj::parseFaceVertexNormalUV(std::vector<std::string> &_tokens)
   }
   m_face.push_back(f);
   return parsedOK;
-
 }
 

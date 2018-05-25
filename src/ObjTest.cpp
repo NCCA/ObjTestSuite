@@ -4,6 +4,7 @@
 #include <fstream>
 #include <array>
 #include "Obj.h"
+#include <memory>
 
 int main(int argc, char **argv)
 {
@@ -20,7 +21,6 @@ const std::array<const char *,7> validfiles={
    "files/Triangle3UV.obj",
    "files/TriMessedFormat.obj",
    "files/CubeNegativeIndex.obj"
-
   }
 };
 
@@ -42,8 +42,13 @@ TEST(ObjFilesPresent,openForReading)
     std::ifstream f(s);
     EXPECT_TRUE(f.good());
   }
-
 }
+
+//TEST(Obj,loadBig)
+//{
+//  Obj a;
+//  EXPECT_TRUE(a.load("files/sponza.obj"));
+//}
 
 TEST(ObjAbstractMesh,defaultCtor)
 {
@@ -59,7 +64,6 @@ TEST(Obj,loadvalid)
   Obj a;
   for(auto f : validfiles)
   {
-//    std::cout<<f<<'\n';
     EXPECT_TRUE(a.load(f));
     EXPECT_TRUE(a.isLoaded());
   }
@@ -133,7 +137,7 @@ TEST(Obj,checkNorm)
 TEST(Obj,checkUV)
 {
   Obj a("files/Triangle1.obj");
-  std::vector<ngl::Vec3> uv=a.getTextureCordList();
+  std::vector<ngl::Vec3> uv=a.getUVList();
   ASSERT_TRUE(uv[0]==ngl::Vec3(1.000000f, 0.000000f, 0.000000f));
   ASSERT_TRUE(uv[1]==ngl::Vec3(0.500000f, 1.000000f, 0.000000f));
   ASSERT_TRUE(uv[2]==ngl::Vec3(0.004399f, 0.008916f, 0.000000f));
@@ -199,8 +203,6 @@ TEST(Obj,checkFaceVertOnlyNegativeIndex)
 
 
 
-
-
 TEST(Obj,checkFace)
 {
   Obj a("files/Triangle1.obj");
@@ -217,7 +219,184 @@ TEST(Obj,checkFace)
   ASSERT_EQ(face[0].m_uv[0],0);
   ASSERT_EQ(face[0].m_uv[1],1);
   ASSERT_EQ(face[0].m_uv[2],2);
+}
+
+TEST(Obj,addVertex)
+{
+  Obj a;
+  for(size_t i=0; i<20; ++i)
+    a.addVertex({static_cast<float>(i),static_cast<float>(i),static_cast<float>(i)});
+
+  auto verts=a.getVertexList();
+  for(size_t i=0; i<20; ++i)
+  {
+    EXPECT_TRUE(verts[i]==ngl::Vec3(static_cast<float>(i),static_cast<float>(i),static_cast<float>(i)));
+  }
+}
+
+TEST(Obj,addNormal)
+{
+  Obj a;
+  for(size_t i=0; i<20; ++i)
+    a.addNormal({static_cast<float>(i),static_cast<float>(i),static_cast<float>(i)});
+
+  auto norm=a.getNormalList();
+  for(size_t i=0; i<20; ++i)
+  {
+    EXPECT_TRUE(norm[i]==ngl::Vec3(static_cast<float>(i),static_cast<float>(i),static_cast<float>(i)));
+  }
+}
+
+
+TEST(Obj,addUVVec3)
+{
+  Obj a;
+  for(size_t i=0; i<20; ++i)
+    a.addUV({static_cast<float>(i),static_cast<float>(i),static_cast<float>(i)});
+
+  auto uv=a.getUVList();
+  for(size_t i=0; i<20; ++i)
+  {
+    EXPECT_TRUE(uv[i]==ngl::Vec3(static_cast<float>(i),static_cast<float>(i),static_cast<float>(i)));
+  }
+}
+
+TEST(Obj,addUVVec2)
+{
+  Obj a;
+  for(size_t i=0; i<20; ++i)
+    a.addUV(ngl::Vec2(static_cast<float>(i),static_cast<float>(i)));
+
+  auto uv=a.getUVList();
+  for(size_t i=0; i<20; ++i)
+  {
+    EXPECT_TRUE(uv[i]==ngl::Vec3(static_cast<float>(i),static_cast<float>(i),0.0f));
+  }
+}
+
+TEST(Obj,addFace)
+{
+  Obj a;
+  ngl::Face f;
+  f.m_vert.push_back(0);
+  f.m_vert.push_back(1);
+  f.m_vert.push_back(2);
+  f.m_norm.push_back(0);
+  f.m_norm.push_back(1);
+  f.m_norm.push_back(2);
+  f.m_uv.push_back(0);
+  f.m_uv.push_back(1);
+  f.m_uv.push_back(2);
+
+  a.addFace(f);
+  std::vector<ngl::Face> face=a.getFaceList();
+  // face is f 1/1/1 2/2/2 3/3/3 but we index from 0
+  ASSERT_EQ(face[0].m_vert[0],0);
+  ASSERT_EQ(face[0].m_vert[1],1);
+  ASSERT_EQ(face[0].m_vert[2],2);
+
+  ASSERT_EQ(face[0].m_norm[0],0);
+  ASSERT_EQ(face[0].m_norm[1],1);
+  ASSERT_EQ(face[0].m_norm[2],2);
+
+  ASSERT_EQ(face[0].m_uv[0],0);
+  ASSERT_EQ(face[0].m_uv[1],1);
+  ASSERT_EQ(face[0].m_uv[2],2);
+}
+
+std::unique_ptr<Obj> buildObj()
+{
+  std::unique_ptr<Obj> a=std::make_unique<Obj>();
+
+  a->addVertex({2.00000f,0.00000f,0.000000f});
+  a->addVertex({0.0000f,4.0000f,0.000000});
+  a->addVertex({-2.00000f,0.000000f,0.000000});
+  a->addUV({1.000000f,0.000000f});
+  a->addUV({0.500000f,1.000000f});
+  a->addUV({0.004399f,0.008916f});
+  a->addNormal({0.000000f,0.000000f,1.000000f});
+  a->addNormal({0.000000f,0.000000f,1.000000f});
+  a->addNormal({0.000000f,0.000000f,1.000000f});
+  ngl::Face f;
+  // f 1/1/1 2/2/2 3/3/3
+  f.m_vert.push_back(0);
+  f.m_vert.push_back(1);
+  f.m_vert.push_back(2);
+  f.m_uv.push_back(0);
+  f.m_uv.push_back(1);
+  f.m_uv.push_back(2);
+  f.m_norm.push_back(0);
+  f.m_norm.push_back(1);
+  f.m_norm.push_back(2);
+  a->addFace(f);
+
+  return a;
+}
+
+
+TEST(Obj,buildObj)
+{
+  std::unique_ptr<Obj> a=buildObj();
+  std::vector<ngl::Face> face=a->getFaceList();
+  // face is f 1/1/1 2/2/2 3/3/3 but we index from 0
+  ASSERT_EQ(face[0].m_vert[0],0);
+  ASSERT_EQ(face[0].m_vert[1],1);
+  ASSERT_EQ(face[0].m_vert[2],2);
+  ASSERT_EQ(face[0].m_norm[0],0);
+  ASSERT_EQ(face[0].m_norm[1],1);
+  ASSERT_EQ(face[0].m_norm[2],2);
+  ASSERT_EQ(face[0].m_uv[0],0);
+  ASSERT_EQ(face[0].m_uv[1],1);
+  ASSERT_EQ(face[0].m_uv[2],2);
+  auto verts=a->getVertexList();
+  ASSERT_TRUE(verts[0]==ngl::Vec3(2.00000f,0.00000f,0.000000f));
+  ASSERT_TRUE(verts[1]==ngl::Vec3(0.0000f,4.0000f,0.000000));
+  ASSERT_TRUE(verts[2]==ngl::Vec3(-2.00000f,0.000000f,0.000000));
+  auto norm=a->getNormalList();
+  ASSERT_TRUE(norm[0]==ngl::Vec3(0.000000f,0.000000f,1.000000f));
+  ASSERT_TRUE(norm[1]==ngl::Vec3(0.000000f,0.000000f,1.000000f));
+  ASSERT_TRUE(norm[2]==ngl::Vec3(0.000000f,0.000000f,1.000000f));
+  auto uv=a->getUVList();
+  ASSERT_TRUE(uv[0]==ngl::Vec3(1.000000f,0.000000f,0.000000f));
+  ASSERT_TRUE(uv[1]==ngl::Vec3(0.500000f,1.000000f,0.000000f));
+  ASSERT_TRUE(uv[2]==ngl::Vec3(0.004399f,0.008916f,0.000000f));
 
 
 }
+
+
+TEST(Obj,saveObj)
+{
+  std::unique_ptr<Obj> a=buildObj();
+  a->save("test.obj");
+
+  Obj b("test.obj");
+
+  std::vector<ngl::Face> face=b.getFaceList();
+  // face is f 1/1/1 2/2/2 3/3/3 but we index from 0
+  ASSERT_EQ(face[0].m_vert[0],0);
+  ASSERT_EQ(face[0].m_vert[1],1);
+  ASSERT_EQ(face[0].m_vert[2],2);
+  ASSERT_EQ(face[0].m_norm[0],0);
+  ASSERT_EQ(face[0].m_norm[1],1);
+  ASSERT_EQ(face[0].m_norm[2],2);
+  ASSERT_EQ(face[0].m_uv[0],0);
+  ASSERT_EQ(face[0].m_uv[1],1);
+  ASSERT_EQ(face[0].m_uv[2],2);
+  auto verts=b.getVertexList();
+  ASSERT_TRUE(verts[0]==ngl::Vec3(2.00000f,0.00000f,0.000000f));
+  ASSERT_TRUE(verts[1]==ngl::Vec3(0.0000f,4.0000f,0.000000));
+  ASSERT_TRUE(verts[2]==ngl::Vec3(-2.00000f,0.000000f,0.000000));
+  auto norm=b.getNormalList();
+  ASSERT_TRUE(norm[0]==ngl::Vec3(0.000000f,0.000000f,1.000000f));
+  ASSERT_TRUE(norm[1]==ngl::Vec3(0.000000f,0.000000f,1.000000f));
+  ASSERT_TRUE(norm[2]==ngl::Vec3(0.000000f,0.000000f,1.000000f));
+  auto uv=b.getUVList();
+  ASSERT_TRUE(uv[0]==ngl::Vec3(1.000000f,0.000000f,0.000000f));
+  ASSERT_TRUE(uv[1]==ngl::Vec3(0.500000f,1.000000f,0.000000f));
+  ASSERT_TRUE(uv[2]==ngl::Vec3(0.004399f,0.008916f,0.000000f));
+
+
+}
+
 

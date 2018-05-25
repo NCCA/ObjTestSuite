@@ -10,8 +10,15 @@ class Obj : public ngl::AbstractMesh
   public :
     Obj()  noexcept: ngl::AbstractMesh(){}
     Obj(const std::string& _fname  , CalcBB _clacBB=CalcBB::True)  noexcept ;
+    void addVertex(const ngl::Vec3 &_v);
+    void addNormal(const ngl::Vec3 &_v);
+    void addUV(const ngl::Vec2 &_v);
+    void addUV(const ngl::Vec3 &_v);
+    void addFace(const ngl::Face &_f);
+
 
     virtual bool load(const std::string_view &_fname, CalcBB _calcBB=CalcBB::True ) noexcept;
+    bool save(const std::string_view &_fname);
     bool isLoaded() const {return m_isLoaded;}
   private :
     bool parseVertex(std::vector<std::string> &_tokens);
