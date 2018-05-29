@@ -524,12 +524,13 @@ TEST(Obj,copyctor)
   f.m_uv.push_back(0);
   f.m_uv.push_back(1);
   f.m_uv.push_back(2);
-
+  a.addFace(f);
   Obj b(a);
   std::vector<ngl::Face> face=b.getFaceList();
-  // face is f 1/1/1 2/2/2 3/3/3 but we index from 0
+   // face is f 1/1/1 2/2/2 3/3/3 but we index from 0
   ASSERT_EQ(face[0].m_vert[0],0);
   ASSERT_EQ(face[0].m_vert[1],1);
+
   auto verts=b.getVertexList();
   ASSERT_TRUE(verts[0]==ngl::Vec3(2.00000f,0.00000f,0.000000f));
   ASSERT_TRUE(verts[1]==ngl::Vec3(0.0000f,4.0000f,0.000000));
@@ -539,6 +540,27 @@ TEST(Obj,copyctor)
   ASSERT_TRUE(uv[0]==ngl::Vec3(1.000000f,0.000000f,0.000000f));
   ASSERT_TRUE(uv[1]==ngl::Vec3(0.500000f,1.000000f,0.000000f));
   ASSERT_TRUE(uv[2]==ngl::Vec3(0.004399f,0.008916f,0.000000f));
+
+}
+
+
+TEST(Obj,passbyref)
+{
+  Obj a;
+  for(size_t v=0; v<10; ++v)
+    a.addVertex({0,0,0});
+  size_t count=0;
+  auto countVerts=[&count](const  Obj &_o)
+  {
+    auto data=_o.getVertexList();
+    for(auto f : data)
+    {
+      ++count;
+    }
+  };
+
+  countVerts(a);
+  EXPECT_EQ(count,10);
 
 
 }

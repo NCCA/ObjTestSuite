@@ -11,12 +11,25 @@ Obj::Obj(const std::string& _fname  , CalcBB _calcBB)  noexcept :AbstractMesh()
 
 Obj::Obj(const Obj &_c)
 {
-
-}
-
-Obj::Obj(Obj &&_c)
-{
-
+  m_verts=_c.m_verts;
+  m_norm=_c.m_norm;
+  m_uv=_c.m_uv;
+  m_face=_c.m_face;
+  m_center=_c.m_center;
+  m_vbo=false;
+  m_vao=false;
+  m_vboMapped=false;
+  m_texture=_c.m_texture;
+  m_textureID=_c.m_textureID;
+  m_maxX=_c.m_maxX;
+  m_minX=_c.m_minX;
+  m_maxY=_c.m_maxY;
+  m_minY=_c.m_minY;
+  m_maxZ=_c.m_maxZ;
+  m_minZ=_c.m_minZ;
+  m_loaded=true;
+  m_sphereCenter=_c.m_sphereCenter;
+  m_sphereRadius=_c.m_sphereRadius;
 }
 
 
@@ -49,7 +62,7 @@ bool Obj::save(const std::string_view &_fname)
   std::ofstream out(_fname.data());
   if (out.is_open() != true)
   {
-    std::cout<<"ERROR could not open file for writing "<<_fname.data()<<"\n";
+    std::cerr<<"ERROR could not open file for writing "<<_fname.data()<<"\n";
     return false;
   }
   // write out some comments
@@ -111,7 +124,7 @@ bool Obj::load(const std::string_view & _fname, CalcBB _calcBB ) noexcept
   std::ifstream in(_fname.data());
   if (in.is_open() != true)
   {
-    std::cout<<"ERROR .obj file not found  "<<_fname.data()<<"\n";
+    std::cerr<<"ERROR .obj file not found  "<<_fname.data()<<"\n";
     return false;
   }
 
