@@ -364,7 +364,6 @@ TEST(Obj,buildObj)
 
 }
 
-
 TEST(Obj,saveVertsOnly)
 {
   Obj a;

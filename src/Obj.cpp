@@ -1,6 +1,5 @@
 #include "Obj.h"
 #include "pystring.h"
-#include <string>
 #include <cmath>
 namespace ps=pystring;
 
@@ -216,9 +215,14 @@ bool Obj::parseUV(std::vector<std::string> &_tokens)
   bool parsedOK=true;
   try
   {
-    float x=std::stof(_tokens[1]);
-    float y=std::stof(_tokens[2]);
-    float z=std::stof(_tokens[3]);
+    float x,y,z=0.0f;
+    x=std::stof(_tokens[1]);
+    y=std::stof(_tokens[2]);
+    if(_tokens.size() == 4)
+    {
+      z=std::stof(_tokens[3]);
+    }
+
     m_uv.push_back({x,y,z});
     ++m_currentUVOffset;
   }
